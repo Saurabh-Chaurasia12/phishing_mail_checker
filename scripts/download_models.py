@@ -2,10 +2,11 @@
 """
 scripts/download_models.py – Download and verify all pretrained model weights.
 
-This script handles downloading models that can't be auto-fetched at runtime:
+This script handles downloading models that should be stored locally under
+``pretrained_models/``:
     1. L2CS-Net – PyTorch checkpoint (manual or URL-based download)
-    2. DeBERTa  – (auto-cached by HuggingFace, but can be pre-downloaded here)
-    3. Cognitive classifier – (trained locally, no download needed)
+    2. DeBERTa  – downloaded from HuggingFace and saved locally
+    3. Cognitive classifier – trained locally, no download needed
 
 Usage:
     python scripts/download_models.py              # download everything

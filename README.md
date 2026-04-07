@@ -31,7 +31,7 @@ project_root/
 ├── requirements.txt                 # Python dependencies
 │
 ├── gaze_module/
-│   ├── gaze360_inference.py         # L2CS-Net PyTorch inference
+│   ├── gaze360_inference.py         # L2CS-Net PyTorch inference (legacy filename)
 │   ├── mediapipe_fallback.py        # MediaPipe iris-based gaze
 │   └── gaze_mapper.py              # Fixation detection & region mapping
 │
@@ -84,28 +84,56 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 
 ### 3.3 Download Pretrained Models
 
+Use the downloader script to verify and fetch the models that can be stored in
+`pretrained_models/`:
+
+```bash
+python scripts/download_models.py --verify
+python scripts/download_models.py --nlp
+```
+
+- `--nlp` downloads DeBERTa into `pretrained_models/deberta_v3_small/`.
+- `--gaze` checks L2CS-Net and, if you configured a direct URL, downloads it
+  into `pretrained_models/l2csnet_gaze360.pkl`.
+- `--all` runs both download steps and then prints a status summary.
+
 #### L2CS-Net
 
-1. Download an L2CS-Net checkpoint from your preferred source.
-2. Save/rename it to `l2csnet_gaze360.pkl`.
+1. Download an L2CS-Net checkpoint from the official project/release source you trust.
+2. Save or rename it to `l2csnet_gaze360.pkl`.
 3. Place it in `pretrained_models/l2csnet_gaze360.pkl`.
+4. Optional requirements: `torch`, `torchvision`, `opencv-python`.
+5. If you want the script to auto-download it, set `L2CSNET_WEIGHTS_URL` to a direct file URL before running `python scripts/download_models.py --gaze`.
 
 If the file is not present the system automatically falls back to MediaPipe.
+
+#### DeBERTa-v3-small
+
+1. Download it with the script:
+  ```bash
+  python scripts/download_models.py --nlp
+  ```
+2. It is stored locally in `pretrained_models/deberta_v3_small/`.
+3. Required Python packages: `transformers`, `tokenizers`, `torch`.
+4. For fine-tuning, you may also want `datasets` and `accelerate`.
 
 #### OpenFace (optional)
 
 1. Download from [OpenFace releases](https://github.com/TadasBaltrusaitis/OpenFace/releases).
 2. Extract and set the environment variable:
-   ```bash
-   set OPENFACE_BIN=C:\OpenFace\FeatureExtraction.exe    # Windows
-   export OPENFACE_BIN=/opt/OpenFace/build/bin/FeatureExtraction  # Linux
-   ```
-3. If not installed the system uses a MediaPipe-based fallback automatically.
+  ```bash
+  set OPENFACE_BIN=C:\OpenFace\FeatureExtraction.exe    # Windows
+  export OPENFACE_BIN=/opt/OpenFace/build/bin/FeatureExtraction  # Linux
+  ```
+3. If not installed, the system uses a MediaPipe-based fallback automatically.
+4. Optional requirement: the external OpenFace executable itself; no Python package is enough.
 
-#### DeBERTa-v3-small
+#### Cognitive classifier
 
-Downloaded automatically by HuggingFace on first run. No manual step needed.
-To use a different model variant edit `NLP_MODEL_NAME` in `config.py`.
+1. No pretrained download is required.
+2. The system uses a rule-based heuristic until you train and save a model.
+3. To train one, run `python scripts/finetune_cognitive.py train --data <csv>`.
+4. Required packages for training: `scikit-learn`, `joblib`.
 
 ---
 
@@ -161,7 +189,8 @@ mock_mode: false
 
 ### 6.1 Gaze Module
 
-- **L2CSNetEstimator**: Loads the L2CS-Net PyTorch checkpoint. Produces a
+- **L2CSNetEstimator**: Loads the L2CS-Net PyTorch checkpoint from
+  `pretrained_models/l2csnet_gaze360.pkl`. Produces a
   3-D gaze direction estimate and converts it to screen pixel coordinates via
   yaw/pitch projection.
 - **MediaPipeGazeEstimator**: Uses the refined iris landmarks (468–477)
