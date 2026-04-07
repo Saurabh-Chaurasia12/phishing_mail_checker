@@ -1,0 +1,35 @@
+# ============================================================
+# Multimodal Phishing Detection – Research Prototype
+# Requirements (Python 3.9+)
+# ============================================================
+
+# ---------- Core ----------
+numpy>=1.24,<2.0
+opencv-python>=4.8
+Pillow>=10.0
+
+# ---------- Deep Learning ----------
+torch>=2.1
+torchvision>=0.16
+
+# ---------- NLP ----------
+transformers>=4.36
+tokenizers>=0.15
+datasets>=2.16            # for dataset loading / evaluation
+accelerate>=0.25          # for device placement
+shap>=0.43                # SHAP interpretability (optional)
+
+# ---------- Gaze / Face ----------
+mediapipe>=0.10           # fallback gaze via Face Mesh
+scipy>=1.11               # signal processing / fixation detection
+
+# ---------- Cognitive-state classifier ----------
+scikit-learn>=1.3
+joblib>=1.3
+
+# ---------- Utilities ----------
+pyyaml>=6.0
+tqdm>=4.66
+
+# ---------- Async video pipeline ----------
+asyncio-compat>=1.0; python_version<"3.10"

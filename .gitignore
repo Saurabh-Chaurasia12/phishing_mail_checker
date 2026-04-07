@@ -1,0 +1,8 @@
+venv/
+logs/*
+!logs/.gitkeep
+__pycache__/
+pretrained_models/*
+!pretrained_models/.gitkeep
+*.pyc
+.env
