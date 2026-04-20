@@ -30,6 +30,11 @@ joblib>=1.3
 # ---------- Utilities ----------
 pyyaml>=6.0
 tqdm>=4.66
+easyocr>=1.7               # OCR from screen captures (pure Python, no Tesseract needed)
+pytesseract>=0.3.10        # Optional OCR backend (requires Tesseract OCR engine installed)
+openpyxl>=3.1              # Read Neon fallback xlsx files (e.g., time.xlsx)
+google-generativeai>=0.8   # Gemini API client used by email_phishing_detector.py
+mss>=9.0                   # Screen capture backend used by email_phishing_detector.py
 
 # ---------- Async video pipeline ----------
 asyncio-compat>=1.0; python_version<"3.10"

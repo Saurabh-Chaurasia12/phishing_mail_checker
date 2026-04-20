@@ -176,7 +176,14 @@ class MediaPipeFaceExtractor:
             import mediapipe as mp  # type: ignore
         except ImportError as exc:
             raise RuntimeError("mediapipe is required for the fallback face extractor") from exc
-        self._mp_face_mesh = mp.solutions.face_mesh.FaceMesh(
+
+        solutions = getattr(mp, "solutions", None)
+        if solutions is None or not hasattr(solutions, "face_mesh"):
+            raise RuntimeError(
+                "mediapipe.solutions.face_mesh is unavailable in the installed mediapipe package"
+            )
+
+        self._mp_face_mesh = solutions.face_mesh.FaceMesh(
             static_image_mode=False,
             max_num_faces=1,
             refine_landmarks=True,
@@ -272,7 +279,7 @@ class MockFaceExtractor:
 def create_face_extractor() -> OpenFaceExtractor | MediaPipeFaceExtractor | MockFaceExtractor:
     """Return the best available face extractor."""
     if config.MOCK_MODE:
-        logger.info("Mock mode → MockFaceExtractor")
+        logger.info("Mock mode -> MockFaceExtractor")
         return MockFaceExtractor()
 
     if config.OPENFACE_AVAILABLE:
@@ -287,5 +294,5 @@ def create_face_extractor() -> OpenFaceExtractor | MediaPipeFaceExtractor | Mock
     except RuntimeError:
         pass
 
-    logger.warning("No face extractor available → MockFaceExtractor")
+    logger.warning("No face extractor available -> MockFaceExtractor")
     return MockFaceExtractor()

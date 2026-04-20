@@ -30,7 +30,7 @@ def _init_root_logger() -> None:
     console = logging.StreamHandler(sys.stdout)
     console.setLevel(logging.DEBUG)
     fmt = logging.Formatter(
-        "[%(asctime)s] %(levelname)-8s %(name)-30s │ %(message)s",
+        "[%(asctime)s] %(levelname)-8s %(name)-30s | %(message)s",
         datefmt="%H:%M:%S",
     )
     console.setFormatter(fmt)

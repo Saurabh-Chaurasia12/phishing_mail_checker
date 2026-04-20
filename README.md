@@ -110,9 +110,11 @@ If the file is not present the system automatically falls back to MediaPipe.
 #### DeBERTa-v3-small
 
 1. Download it with the script:
-  ```bash
-  python scripts/download_models.py --nlp
-  ```
+
+```bash
+python scripts/download_models.py --nlp
+```
+
 2. It is stored locally in `pretrained_models/deberta_v3_small/`.
 3. Required Python packages: `transformers`, `tokenizers`, `torch`.
 4. For fine-tuning, you may also want `datasets` and `accelerate`.
@@ -121,10 +123,12 @@ If the file is not present the system automatically falls back to MediaPipe.
 
 1. Download from [OpenFace releases](https://github.com/TadasBaltrusaitis/OpenFace/releases).
 2. Extract and set the environment variable:
-  ```bash
-  set OPENFACE_BIN=C:\OpenFace\FeatureExtraction.exe    # Windows
-  export OPENFACE_BIN=/opt/OpenFace/build/bin/FeatureExtraction  # Linux
-  ```
+
+```bash
+set OPENFACE_BIN=C:\OpenFace\FeatureExtraction.exe    # Windows
+export OPENFACE_BIN=/opt/OpenFace/build/bin/FeatureExtraction  # Linux
+```
+
 3. If not installed, the system uses a MediaPipe-based fallback automatically.
 4. Optional requirement: the external OpenFace executable itself; no Python package is enough.
 
@@ -159,12 +163,46 @@ python main.py --email path/to/email.txt
 
 ### All arguments
 
-| Argument       | Description                                          |
-| -------------- | ---------------------------------------------------- |
-| `--email PATH` | Path to a plain-text email file                      |
-| `--mock`       | Force mock mode (random gaze/face, keyword-only NLP) |
-| `--no-webcam`  | Use synthetic video frames                           |
-| `--timeout N`  | Auto-stop after N seconds (0 = manual quit with `q`) |
+| Argument                            | Description                                          |
+| ----------------------------------- | ---------------------------------------------------- |
+| `--email PATH`                      | Path to a plain-text email file                      |
+| `--email-from-screen`               | Capture current screen and run OCR for email text    |
+| `--email-from-image PATH`           | Run OCR from an existing screenshot/image            |
+| `--ocr-backend {easyocr,tesseract}` | Select OCR backend for OCR modes                     |
+| `--mock`                            | Force mock mode (random gaze/face, keyword-only NLP) |
+| `--no-webcam`                       | Use synthetic video frames                           |
+| `--timeout N`                       | Auto-stop after N seconds (0 = manual quit with `q`) |
+
+### OCR backend selection
+
+The OCR module now supports both EasyOCR and pytesseract.
+Default backend is Tesseract.
+
+Examples:
+
+```bash
+# Use Tesseract OCR (default)
+python main.py --email-from-screen --ocr-backend tesseract
+
+# Use EasyOCR
+python main.py --email-from-screen --ocr-backend easyocr
+```
+
+You can also configure defaults via environment variables:
+
+```bash
+# Windows
+set MTP_OCR_BACKEND=tesseract
+set MTP_TESSERACT_CMD=C:\Program Files\Tesseract-OCR\tesseract.exe
+set MTP_TESSERACT_LANG=eng
+
+# Linux/macOS
+export MTP_OCR_BACKEND=tesseract
+export MTP_TESSERACT_CMD=/usr/bin/tesseract
+export MTP_TESSERACT_LANG=eng
+```
+
+Note: `pytesseract` requires the native Tesseract OCR engine to be installed on your system.
 
 ---
 

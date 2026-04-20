@@ -96,13 +96,21 @@ class GazeMapper:
 
         self._samples: List[GazeSample] = []
         self._fixations: List[Fixation] = []
+        self._last_processed_sample_idx = 0
+        self._last_emitted_fixation_end = 0.0
 
     # ── add sample ───────────────────────────────
-    def add_sample(self, screen_x: float, screen_y: float, confidence: float) -> None:
-        """Record a new gaze sample with current timestamp."""
+    def add_sample(
+        self,
+        screen_x: float,
+        screen_y: float,
+        confidence: float,
+        timestamp: Optional[float] = None,
+    ) -> None:
+        """Record a new gaze sample."""
         self._samples.append(
             GazeSample(
-                timestamp=time.time(),
+                timestamp=timestamp or time.time(),
                 screen_x=screen_x,
                 screen_y=screen_y,
                 confidence=confidence,
@@ -120,7 +128,8 @@ class GazeMapper:
         if len(self._samples) < 3:
             return new_fixations
 
-        i = 0
+        start_idx = max(self._last_processed_sample_idx - 1, 0)
+        i = start_idx
         while i < len(self._samples):
             j = i + 1
             # Grow window while dispersion is within threshold
@@ -147,12 +156,15 @@ class GazeMapper:
                     end_time=window[-1].timestamp,
                     region=region,
                 )
-                new_fixations.append(fix)
+                if fix.end_time > self._last_emitted_fixation_end:
+                    new_fixations.append(fix)
+                    self._last_emitted_fixation_end = fix.end_time
                 i = j  # skip past this fixation
             else:
                 i += 1
 
         self._fixations.extend(new_fixations)
+        self._last_processed_sample_idx = len(self._samples)
         return new_fixations
 
     # ── summary ──────────────────────────────────

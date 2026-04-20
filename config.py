@@ -44,6 +44,17 @@ USE_L2CSNET = os.path.isfile(L2CSNET_WEIGHTS_PATH) and not MOCK_MODE
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 1080
 
+# Gaze coordinate mapping:
+# - "direct_xy": maps normalized gaze_vec(x,y) directly to screen
+# - "angular": uses yaw/pitch projection from (x,y,z)
+GAZE_MAPPING_MODE = os.environ.get("MTP_GAZE_MAPPING", "direct_xy")
+GAZE_X_GAIN = float(os.environ.get("MTP_GAZE_X_GAIN", "1.2"))
+GAZE_Y_GAIN = float(os.environ.get("MTP_GAZE_Y_GAIN", "1.2"))
+CALIBRATE_GAZE_EVERY_RUN = os.environ.get("MTP_CALIBRATE_GAZE", "1") == "1"
+GAZE_CALIBRATION_POINTS = int(os.environ.get("MTP_GAZE_CALIB_POINTS", "5"))
+GAZE_CALIBRATION_SECONDS_PER_POINT = float(os.environ.get("MTP_GAZE_CALIB_SECONDS", "1.2"))
+GAZE_CALIBRATION_MIN_SAMPLES = int(os.environ.get("MTP_GAZE_CALIB_MIN_SAMPLES", "5"))
+
 # Fixation detection
 FIXATION_RADIUS_PX = 50        # max dispersion for fixation cluster
 FIXATION_MIN_DURATION_S = 0.2  # minimum dwell time (seconds)
@@ -61,6 +72,7 @@ EMAIL_REGIONS = {
 # ──────────────────────────────────────────────
 # Face / Cognitive Module
 # ──────────────────────────────────────────────
+ENABLE_FACE_MODULE = os.environ.get("MTP_ENABLE_FACE", "1") == "1"
 OPENFACE_BINARY = os.environ.get(
     "OPENFACE_BIN",
     r"C:\OpenFace\FeatureExtraction.exe"  # default Windows path
@@ -71,7 +83,7 @@ COG_CLASSIFIER_PATH = os.path.join(MODEL_DIR, "cognitive_classifier.pkl")
 COG_FEATURE_WINDOW_S = 3.0   # seconds of features to aggregate
 
 # ──────────────────────────────────────────────
-# NLP Module
+# Phishing Analysis Module
 # ──────────────────────────────────────────────
 NLP_MODEL_NAME = "microsoft/deberta-v3-small"
 NLP_LOCAL_DIR = os.path.join(MODEL_DIR, "deberta_v3_small")       # base model stored here
@@ -96,6 +108,32 @@ FUSION_INTERVAL_S = 3.0   # run fusion every N seconds
 # Risk thresholds
 PHISHING_HIGH_THRESHOLD = 0.9
 PHISHING_MED_THRESHOLD = 0.6
+
+# ──────────────────────────────────────────────
+# Neon Offline Module
+# ──────────────────────────────────────────────
+NEON_RECORDING_DIR = os.environ.get("MTP_NEON_RECORDING_DIR", "")
+NEON_COORDINATE_MODE = os.environ.get("MTP_NEON_COORDINATE_MODE", "identity")
+NEON_ASSUME_SCREEN_SPACE = os.environ.get("MTP_NEON_ASSUME_SCREEN_SPACE", "1") == "1"
+NEON_COG_FEATURE_WINDOW_S = float(os.environ.get("MTP_NEON_COG_WINDOW_S", "3.0"))
+NEON_ENABLE_COGNITIVE = os.environ.get("MTP_NEON_ENABLE_COGNITIVE", "0") == "1"
+NEON_FIXATION_MIN_DURATION_S = float(os.environ.get("MTP_NEON_FIXATION_MIN_DURATION_S", "0.02"))
+
+# ──────────────────────────────────────────────
+# OCR Module
+# ──────────────────────────────────────────────
+OCR_BACKEND = os.environ.get("MTP_OCR_BACKEND", "tesseract").lower()
+OCR_MODEL_DIR = os.path.join(MODEL_DIR, "easyocr")
+OCR_LANGUAGES = ["en"]                        # language codes for EasyOCR
+OCR_GPU = torch.cuda.is_available()           # use GPU if available
+OCR_CONFIDENCE_THRESHOLD = 0.3                # min confidence to keep a word
+TESSERACT_CMD = os.environ.get("MTP_TESSERACT_CMD", "")
+TESSERACT_LANG = os.environ.get("MTP_TESSERACT_LANG", "eng")
+OCR_WORD_BOXES_CSV = os.environ.get("MTP_OCR_WORD_BOXES_CSV", os.path.join(LOG_DIR, "ocr_word_boxes.csv"))
+
+# Crop OCR to the mail body area before word tracking.
+# Format: (left, top, width, height) relative to the source image/screen.
+MAIL_CONTENT_REGION = (190,190,1540,840)
 
 # ──────────────────────────────────────────────
 # Logging

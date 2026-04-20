@@ -152,12 +152,18 @@ class L2CSNetEstimator:
         norm = np.linalg.norm(gaze_vec) + 1e-8
         gaze_vec = gaze_vec / norm
 
-        # Convert 3-D gaze vector → screen coords (simple linear mapping)
-        yaw = math.atan2(gaze_vec[0], -gaze_vec[2])   # horizontal angle
-        pitch = math.asin(np.clip(gaze_vec[1], -1, 1))  # vertical angle
+        # Map gaze vector to screen coordinates.
+        if getattr(config, "GAZE_MAPPING_MODE", "direct_xy") == "angular":
+            yaw = math.atan2(gaze_vec[0], -gaze_vec[2])
+            pitch = math.asin(np.clip(gaze_vec[1], -1, 1))
+            sx = config.SCREEN_WIDTH / 2 + yaw * (config.SCREEN_WIDTH / math.pi)
+            sy = config.SCREEN_HEIGHT / 2 - pitch * (config.SCREEN_HEIGHT / (math.pi / 2))
+        else:
+            nx = np.clip(0.5 + 0.5 * config.GAZE_X_GAIN * float(gaze_vec[0]), 0.0, 1.0)
+            ny = np.clip(0.5 - 0.5 * config.GAZE_Y_GAIN * float(gaze_vec[1]), 0.0, 1.0)
+            sx = nx * config.SCREEN_WIDTH
+            sy = ny * config.SCREEN_HEIGHT
 
-        sx = config.SCREEN_WIDTH / 2 + yaw * (config.SCREEN_WIDTH / math.pi)
-        sy = config.SCREEN_HEIGHT / 2 - pitch * (config.SCREEN_HEIGHT / (math.pi / 2))
         sx = float(np.clip(sx, 0, config.SCREEN_WIDTH))
         sy = float(np.clip(sy, 0, config.SCREEN_HEIGHT))
 
