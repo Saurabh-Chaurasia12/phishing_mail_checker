@@ -12,8 +12,6 @@ Usage:
 import os
 from typing import Any, Dict
 
-import yaml  # type: ignore
-
 import config
 from utils.logging_utils import get_logger
 
@@ -31,6 +29,13 @@ def load_overrides(path: str | None = None) -> Dict[str, Any]:
     if not os.path.isfile(path):
         logger.debug("No config override file found at %s", path)
         return {}
+
+    try:
+        import yaml  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError(
+            "pyyaml is required to read config_override.yaml. Install with: pip install pyyaml"
+        ) from exc
 
     with open(path, "r", encoding="utf-8") as fh:
         overrides: Dict[str, Any] = yaml.safe_load(fh) or {}

@@ -12,11 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import cv2
-import google.generativeai as genai
-import mss
 import numpy as np
-import pytesseract
-from pytesseract import Output
 
 
 PROMPT_TEMPLATE = '''You are an expert cybersecurity analyst specializing in phishing detection.
@@ -119,6 +115,13 @@ def load_dotenv(dotenv_path: Optional[Path] = None) -> None:
 
 
 def resolve_tesseract_path(explicit_path: Optional[str] = None) -> None:
+    try:
+        import pytesseract  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError(
+            "pytesseract is required for OCR. Install with: pip install pytesseract"
+        ) from exc
+
     if explicit_path:
         pytesseract.pytesseract.tesseract_cmd = explicit_path
         return
@@ -141,6 +144,13 @@ def resolve_tesseract_path(explicit_path: Optional[str] = None) -> None:
 
 def validate_tesseract() -> None:
     try:
+        import pytesseract  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError(
+            "pytesseract is required for OCR. Install with: pip install pytesseract"
+        ) from exc
+
+    try:
         pytesseract.get_tesseract_version()
     except Exception as exc:
         raise RuntimeError(
@@ -149,6 +159,11 @@ def validate_tesseract() -> None:
 
 
 def capture_screenshot(delay_seconds: float = 5.0, monitor_index: int = 1) -> np.ndarray:
+    try:
+        import mss  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError("mss is required for screen capture. Install with: pip install mss") from exc
+
     if delay_seconds > 0:
         print(f"Capturing screenshot in {delay_seconds:.1f} seconds...")
         time.sleep(delay_seconds)
@@ -229,6 +244,14 @@ def extract_email_ocr_bundle_from_image(
     crop_region: Optional[Tuple[int, int, int, int]] = None,
 ) -> OCRBundle:
     """Run OCR and return sentence text plus word-level bounding boxes."""
+    try:
+        import pytesseract  # type: ignore
+        from pytesseract import Output  # type: ignore
+    except ImportError as exc:
+        raise RuntimeError(
+            "pytesseract is required for OCR. Install with: pip install pytesseract"
+        ) from exc
+
     working_img, translated_offset = crop_image_with_offset(
         image,
         crop_region=crop_region,
@@ -427,8 +450,15 @@ def analyze_email(email_text: str) -> Dict[str, Any]:
     if not email_text or not email_text.strip():
         raise ValueError("Email text is empty.")
 
+    try:
+        import google.generativeai as genai
+    except ImportError as exc:
+        raise RuntimeError(
+            "google-generativeai is required for phishing analysis. Install with: pip install google-generativeai"
+        ) from exc
+
     load_dotenv()
-    api_key = "api_key"
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise EnvironmentError(
             "GEMINI_API_KEY environment variable is not set. Add it to the environment or a .env file."
