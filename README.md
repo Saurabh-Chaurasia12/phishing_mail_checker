@@ -35,7 +35,10 @@ This project now runs a focused offline pipeline for phishing-email review:
 ```
 
 ## Run
-1. pip install -r requirements.txt
+
+```bash
+pip install -r requirements.txt
+```
 
 ```bash
 python main.py --email-from-screen
